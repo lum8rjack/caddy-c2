@@ -82,7 +82,7 @@ func (m *C2Profile) Provision(ctx caddy.Context) error {
 
 	// Parse profile and confirm it's a valid profile
 	if m.Framework == "cobaltstrike" {
-		err = m.parseCobaltStrike()
+		err = m.ParseCobaltStrike()
 		if err != nil {
 			return fmt.Errorf("parsing error for Cobalt Strike profile: %v", err)
 		}
@@ -107,11 +107,11 @@ func (m *C2Profile) Match(r *http.Request) bool {
 
 	// Check URIs
 	if r.Method == "GET" {
-		if !contains(m.AllowedGets, r.RequestURI) {
+		if !Contains(m.AllowedGets, r.RequestURI) {
 			return false
 		}
 	} else if r.Method == "POST" {
-		if !contains(m.AllowedPosts, r.RequestURI) {
+		if !Contains(m.AllowedPosts, r.RequestURI) {
 			return false
 		}
 

@@ -34,4 +34,5 @@ test.example.org {
 ## References
 
 - [SeeProxy](https://github.com/nopbrick/SeeProxy) - Go reverse proxy with Cobalt Strike malleable profile validation. This project gave me the idea to create this caddy module.
+- [Malleable-C2-Profiles](https://github.com/xx0hcd/Malleable-C2-Profiles) - Cobalt Strike template used for testing.
 

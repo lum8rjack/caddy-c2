@@ -21,7 +21,7 @@ import (
 )
 
 // Parse Cobalt Strike profile to get User-Agent, URIs, and Headers
-func (m *C2Profile) parseCobaltStrike() error {
+func (m *C2Profile) ParseCobaltStrike() error {
 	var err error
 
 	// Parse data
