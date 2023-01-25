@@ -3,6 +3,12 @@ Caddy v2 module to filter requests based on C2 profiles.
 
 ## Installation
 
+This caddy module uses the following Go packages:
+```
+# Cobalt Strike parser
+github.com/D00Movenok/goMalleable
+```
+
 You can build Caddy by yourself by [installing xcaddy](https://github.com/caddyserver/xcaddy) and running:
 ```
 xcaddy build --with github.com/lum8rjack/caddy-c2
@@ -11,7 +17,7 @@ xcaddy build --with github.com/lum8rjack/caddy-c2
 ## Usage
 
 You can use this module as a matcher to allow only traffic based on the C2 profile. This modules currently works with the following C2 profiles:
-- Cobalt Strike
+- [Cobalt Strike](https://www.cobaltstrike.com/)
 
 ### Caddyfile
 
@@ -30,6 +36,14 @@ test.example.org {
   }
 }
 ```
+
+## Future Improvements
+
+- Add additional logging
+- Support additional C2 frameworks
+  - [Havoc](https://github.com/HavocFramework/Havoc)
+  - [Mythic](https://github.com/its-a-feature/Mythic)
+  - [Sliver](https://github.com/BishopFox/sliver)
 
 ## References
 
