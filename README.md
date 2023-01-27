@@ -21,9 +21,9 @@ You can use this module as a matcher to allow only traffic based on the C2 profi
 
 ### Caddyfile
 
-1. Allow access to Cobalt Strike only requests that match the profile:
+1. Allow access to Cobalt Strike for only requests that match the profile. Everything else is redirected to a different website:
 ```
-test.example.org {
+https://test.example.com {
   @c2 {
     c2_profile {
       profile "/usr/share/cobaltstrike/cobaltstrike.profile"
@@ -32,7 +32,14 @@ test.example.org {
   }
 
   handle @c2 {
-    reverse_proxy localhost:8080
+    reverse_proxy https://localhost:8080 {
+      tls
+      tls_insecure_skip_verify
+    }
+  }
+
+  handle /* {
+    redir https://example.com{uri}
   }
 }
 ```
@@ -48,5 +55,6 @@ test.example.org {
 ## References
 
 - [SeeProxy](https://github.com/nopbrick/SeeProxy) - Go reverse proxy with Cobalt Strike malleable profile validation. This project gave me the idea to create this caddy module.
+- [goMalleable](https://github.com/D00Movenok/goMalleable) - Cobalt Strike malleable C2 profile parser
 - [Malleable-C2-Profiles](https://github.com/xx0hcd/Malleable-C2-Profiles) - Cobalt Strike template used for testing.
 

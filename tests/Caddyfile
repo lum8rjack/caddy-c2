@@ -1,0 +1,32 @@
+{
+	# Switch to turn off https if you don't want it for testing
+	auto_https off
+	admin off
+
+	# Set logging details
+	log {
+		format json
+		level DEBUG
+	}
+}
+
+:8080 {
+	@c2 {
+		c2_profile {
+			profile "profiles/cobaltstrike.profile"
+			framework "cobaltstrike"
+		}
+	}
+
+	handle @c2 {
+		reverse_proxy http://127.0.0.1:8081
+	}
+
+	handle /api/test/status {
+		respond "Working!"
+	}
+
+	handle /* {
+		redir http://example.com
+	}
+}
