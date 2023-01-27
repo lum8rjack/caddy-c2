@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
@@ -52,11 +53,15 @@ func (m *C2Profile) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 		for nesting := d.Nesting(); d.NextBlock(nesting); {
 			switch d.Val() {
 			case "profile":
+				if !d.NextArg() {
+					return d.ArgErr()
+				}
 				m.Profile = d.Val()
 			case "framework":
+				if !d.NextArg() {
+					return d.ArgErr()
+				}
 				m.Framework = d.Val()
-			default:
-				return fmt.Errorf("unexpected config parameter %s", d.Val())
 			}
 		}
 	}
@@ -90,6 +95,8 @@ func (m *C2Profile) Provision(ctx caddy.Context) error {
 		return fmt.Errorf("framework not supported %s: %v", m.Framework, err)
 	}
 
+	m.logger.Info("profile parsed", zap.String("framework", m.Framework), zap.String("profile", m.Profile), zap.String("user_agent", m.Useragent), zap.String("get_requests", strconv.Itoa(len(m.AllowedGets))), zap.String("post_requests", strconv.Itoa(len(m.AllowedPosts))))
+
 	return err
 }
 
@@ -118,6 +125,8 @@ func (m *C2Profile) Match(r *http.Request) bool {
 	} else { // Only GET and POST accepted
 		return false
 	}
+
+	m.logger.Debug("passed all checks", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
 
 	return true
 }
