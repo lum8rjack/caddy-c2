@@ -1,15 +1,13 @@
-package tests
+package caddy_c2
 
 import (
 	"os"
 	"testing"
-
-	caddy_c2 "github.com/lum8rjack/caddy-c2"
 )
 
 var (
 	CS_PROFILES []string = []string{
-		"profiles/cobaltstrike.profile",
+		"tests/profiles/cobaltstrike.profile",
 	}
 
 	CS_USERAGENTS []string = []string{
@@ -31,11 +29,15 @@ var (
 // POST URIs.
 func TestParseCobaltStrike(t *testing.T) {
 	// Setup the caddy module
-	var module caddy_c2.C2Profile
+	module := &C2Profile{
+		Profile:   "",
+		Framework: "cobaltstrike",
+	}
 	var err error
 
 	// Loop through each example profile
 	for n, p := range CS_PROFILES {
+		module.Profile = p
 		// Read the file
 		module.Data, err = os.ReadFile(p)
 		if err != nil {
@@ -55,7 +57,7 @@ func TestParseCobaltStrike(t *testing.T) {
 
 		// Confirm GET URIs
 		for _, g := range module.AllowedGets {
-			if !caddy_c2.Contains(CS_GETURI[n], g) {
+			if !Contains(CS_GETURI[n], g) {
 				t.Fatalf("GET URI %s not in the list\n", g)
 			}
 		}
@@ -65,7 +67,7 @@ func TestParseCobaltStrike(t *testing.T) {
 
 		// Confirm POST URIs
 		for _, g := range module.AllowedPosts {
-			if !caddy_c2.Contains(CS_POSTURI[n], g) {
+			if !Contains(CS_POSTURI[n], g) {
 				t.Fatalf("POST URI %s not in the list\n", g)
 			}
 		}

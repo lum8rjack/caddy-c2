@@ -25,37 +25,38 @@ func (m *C2Profile) ParseCobaltStrike() error {
 	var err error
 
 	// Parse data
-	parsed, err := parser.Parse(string(m.Data))
+	myReader := strings.NewReader(string(m.Data))
+	parsed, err := parser.Parse(myReader)
 	if err != nil {
 		return err
 	}
 
 	// Get useragent
-	m.Useragent = parsed.Globals["useragent"]
+	m.Useragent = parsed.UserAgent
 
 	// GET details
-	for _, x := range parsed.HttpGet {
+	for _, x := range parsed.HTTPGet {
 		// URIs
-		y := strings.Split(x.Params["uri"], " ")
-		m.AllowedGets = append(m.AllowedGets, y...)
+		uris := strings.Split(x.URI.String(), " ")
+		m.AllowedGets = append(m.AllowedGets, uris...)
 	}
 
 	// POST details
-	for _, x := range parsed.HttpPost {
+	for _, x := range parsed.HTTPPost {
 		// URIs
-		y := strings.Split(x.Params["uri"], " ")
-		m.AllowedPosts = append(m.AllowedPosts, y...)
+		uris := strings.Split(x.URI.String(), " ")
+		m.AllowedPosts = append(m.AllowedPosts, uris...)
 	}
 
 	// HTTP Stager
-	for _, x := range parsed.HttpStager {
+	for _, x := range parsed.HTTPStager {
 		// URIs
-		x64 := x.Params["uri_x64"]
+		x64 := x.URIx64.String()
 		if x64 != "" {
 			m.AllowedGets = append(m.AllowedGets, x64)
 		}
 
-		x86 := x.Params["uri_x86"]
+		x86 := x.URIx86.String()
 		if x86 != "" {
 			m.AllowedGets = append(m.AllowedGets, x86)
 		}
