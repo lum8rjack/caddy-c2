@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
 
 	"github.com/caddyserver/caddy/v2"
@@ -109,20 +110,24 @@ func (m *C2Profile) Cleanup() error {
 func (m *C2Profile) Match(r *http.Request) bool {
 	// Check User-Agent
 	if r.Header.Get("User-Agent") != m.Useragent {
+		m.logger.Debug("failed User-Agent check", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
 		return false
 	}
 
-	// Check URIs
+	// Check URLs (disregard the query parameters)
 	if r.Method == "GET" {
-		if !Contains(m.AllowedGets, r.RequestURI) {
+		if !slices.Contains(m.AllowedGets, r.URL.Path) {
+			m.logger.Debug("failed GET check", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
 			return false
 		}
 	} else if r.Method == "POST" {
-		if !Contains(m.AllowedPosts, r.RequestURI) {
+		if !slices.Contains(m.AllowedPosts, r.URL.Path) {
+			m.logger.Debug("failed POST check", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
 			return false
 		}
 
 	} else { // Only GET and POST accepted
+		m.logger.Debug("method not supported", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
 		return false
 	}
 

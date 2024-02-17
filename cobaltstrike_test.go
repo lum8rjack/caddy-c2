@@ -1,7 +1,9 @@
 package caddy_c2
 
 import (
+	"net/url"
 	"os"
+	"slices"
 	"testing"
 )
 
@@ -20,6 +22,10 @@ var (
 
 	CS_POSTURI [][]string = [][]string{
 		{"/Login", "/Config", "/Admin"},
+	}
+
+	CS_GETURI_PARAMS [][]string = [][]string{
+		{"/login?file=testing", "/console?file=test.txt"},
 	}
 )
 
@@ -57,7 +63,7 @@ func TestParseCobaltStrike(t *testing.T) {
 
 		// Confirm GET URIs
 		for _, g := range module.AllowedGets {
-			if !Contains(CS_GETURI[n], g) {
+			if !slices.Contains(CS_GETURI[n], g) {
 				t.Fatalf("GET URI %s not in the list\n", g)
 			}
 		}
@@ -67,12 +73,24 @@ func TestParseCobaltStrike(t *testing.T) {
 
 		// Confirm POST URIs
 		for _, g := range module.AllowedPosts {
-			if !Contains(CS_POSTURI[n], g) {
+			if !slices.Contains(CS_POSTURI[n], g) {
 				t.Fatalf("POST URI %s not in the list\n", g)
 			}
 		}
 		if len(CS_POSTURI[n]) != len(module.AllowedPosts) {
 			t.Fatalf("Number of POST URIs in the profile %d does not equal %d\n", len(module.AllowedPosts), len(CS_POSTURI[n]))
 		}
+
+		// Check the added query parameters
+		for _, g := range CS_GETURI_PARAMS[n] {
+			path, err := url.Parse("https://127.0.0.1" + g)
+			if err != nil {
+				t.Fatalf("error parsing url http://127.0.0.1%s n", g)
+			}
+			if !slices.Contains(module.AllowedGets, path.Path) {
+				t.Fatalf("GET URI_PARAMS %s not in the list\n", g)
+			}
+		}
+
 	}
 }

@@ -1,4 +1,7 @@
 # caddy-c2
+
+![Tests](https://github.com/lum8rjack/caddy-c2/actions/workflows/go.yml/badge.svg)
+
 Caddy v2 module to filter requests based on C2 profiles.
 
 ## Installation
@@ -23,6 +26,11 @@ You can use this module as a matcher to allow only traffic based on the C2 profi
 
 1. Allow access to Cobalt Strike for only requests that match the profile. Everything else is redirected to a different website:
 ```
+{
+  admin off
+  debug
+}
+
 https://test.example.com {
   @c2 {
     c2_profile {
@@ -46,7 +54,6 @@ https://test.example.com {
 
 ## Future Improvements
 
-- Add additional logging
 - Support additional C2 frameworks
   - [Havoc](https://github.com/HavocFramework/Havoc)
   - [Mythic](https://github.com/its-a-feature/Mythic)
