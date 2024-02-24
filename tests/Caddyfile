@@ -19,7 +19,13 @@
 	}
 
 	handle @c2 {
-		reverse_proxy http://127.0.0.1:8081
+		reverse_proxy https://127.0.0.1:8081 {
+			header_up Host {http.request.host}
+			transport http {
+				tls
+				tls_insecure_skip_verify
+			}
+		}
 	}
 
 	handle /api/test/status {

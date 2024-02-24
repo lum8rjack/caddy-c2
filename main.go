@@ -1,6 +1,7 @@
 /*
 Currently only supports the following frameworks:
 	1. Cobalt Strike
+	2. Empire
 */
 
 package caddy_c2
@@ -91,6 +92,11 @@ func (m *C2Profile) Provision(ctx caddy.Context) error {
 		err = m.ParseCobaltStrike()
 		if err != nil {
 			return fmt.Errorf("parsing error for Cobalt Strike profile: %v", err)
+		}
+	} else if m.Framework == "empire" {
+		err = m.ParseEmpire()
+		if err != nil {
+			return fmt.Errorf("parsing error for Empire profile: %v", err)
 		}
 	} else {
 		return fmt.Errorf("framework not supported %s: %v", m.Framework, err)

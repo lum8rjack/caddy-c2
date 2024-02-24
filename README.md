@@ -2,29 +2,30 @@
 
 ![Tests](https://github.com/lum8rjack/caddy-c2/actions/workflows/go.yml/badge.svg)
 
-Caddy v2 module to filter requests based on C2 profiles.
+Caddy v2 module to match network traffic and only allow traffic based on C2 profiles. This module currently works with the following C2 frameworks:
+- [Cobalt Strike](https://www.cobaltstrike.com/)
+- [Empire](https://github.com/BC-SECURITY/Empire) - Uses the same profile as Cobalt Strike ([docs](https://bc-security.gitbook.io/empire-wiki/listeners/malleable-c2))
 
 ## Installation
 
-This caddy module uses the following Go packages:
-```
-# Cobalt Strike parser
-github.com/D00Movenok/goMalleable
-```
-
-You can build Caddy by yourself by [installing xcaddy](https://github.com/caddyserver/xcaddy) and running:
-```
+You can build Caddy by yourself by installing [xcaddy](https://github.com/caddyserver/xcaddy) and running:
+```bash
 xcaddy build --with github.com/lum8rjack/caddy-c2
 ```
 
-## Usage
-
-You can use this module as a matcher to allow only traffic based on the C2 profile. This modules currently works with the following C2 profiles:
-- [Cobalt Strike](https://www.cobaltstrike.com/)
+If you want to clone and make any changes, you can test locally with the following command:
+```bash
+# Specify the location of the local build
+ xcaddy build --with github.com/lum8rjack/caddy-c2=./caddy-c2
+```
 
 ### Caddyfile
 
-1. Allow access to Cobalt Strike for only requests that match the profile. Everything else is redirected to a different website:
+Allow access to the C2 server for only requests that match the profile. Everything else is redirected to a different website. The supported frameworks include:
+- cobaltstrike
+- empire
+
+Below is an example Caddyfile for use with Cobalt Strike.
 ```
 {
   admin off
@@ -41,8 +42,11 @@ https://test.example.com {
 
   handle @c2 {
     reverse_proxy https://localhost:8080 {
-      tls
-      tls_insecure_skip_verify
+      header_up Host {http.request.host}
+      transport http {
+        tls
+        tls_insecure_skip_verify
+      }
     }
   }
 
@@ -51,6 +55,7 @@ https://test.example.com {
   }
 }
 ```
+
 
 ## Future Improvements
 
