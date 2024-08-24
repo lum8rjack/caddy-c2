@@ -2,6 +2,7 @@
 Currently only supports the following frameworks:
 	1. Cobalt Strike
 	2. Empire
+	3. NimPlant
 */
 
 package caddy_c2
@@ -97,6 +98,11 @@ func (m *C2Profile) Provision(ctx caddy.Context) error {
 		err = m.ParseEmpire()
 		if err != nil {
 			return fmt.Errorf("parsing error for Empire profile: %v", err)
+		}
+	} else if m.Framework == "nimplant" {
+		err = m.ParseNimPlant()
+		if err != nil {
+			return fmt.Errorf("parsing error for NimPlant config: %v", err)
 		}
 	} else {
 		return fmt.Errorf("framework not supported %s: %v", m.Framework, err)
