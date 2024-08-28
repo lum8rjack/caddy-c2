@@ -20,14 +20,13 @@ var (
 	}
 
 	NIM_POSTURI [][]string = [][]string{
-		{"/result"},
+		{"/register", "/result"},
 	}
 )
 
 // TestParseNimPlant
 // Validates the function correctly parses NimPlant
-// profiles and has the correct User-Agent, GET URIs and
-// POST URIs.
+// profiles and has the correct User-Agent, GET and POST URIs.
 func TestParseNimPlant(t *testing.T) {
 	// Setup the caddy module
 	module := &C2Profile{

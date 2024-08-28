@@ -30,7 +30,7 @@ type NimPlantConfig struct {
 	} `toml:"nimplant"`
 }
 
-// Parse NimPlant profile to get User-Agent, URIs, and Headers
+// Parse NimPlant profile to get User-Agent and URIs
 func (m *C2Profile) ParseNimPlant() error {
 	var parsed NimPlantConfig
 
@@ -48,6 +48,7 @@ func (m *C2Profile) ParseNimPlant() error {
 	m.AllowedGets = append(m.AllowedGets, parsed.Listener.TaskPath)
 
 	// POST details
+	m.AllowedPosts = append(m.AllowedPosts, parsed.Listener.RegisterPath)
 	m.AllowedPosts = append(m.AllowedPosts, parsed.Listener.ResultPath)
 
 	return err
