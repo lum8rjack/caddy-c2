@@ -7,6 +7,8 @@ Caddy v2 module to match network traffic and only allow traffic based on C2 prof
 - [Empire](https://github.com/BC-SECURITY/Empire) - Uses the same profile as Cobalt Strike ([docs](https://bc-security.gitbook.io/empire-wiki/listeners/malleable-c2))
 - [NimPlant](https://github.com/chvancooten/NimPlant)
 
+Check out the blog post for more details: [C2 Redirectors Made Easy](https://blog.lum8rjack.com/posts/caddy-c2)
+
 ## Installation
 
 You can build Caddy by yourself by installing [xcaddy](https://github.com/caddyserver/xcaddy) and running:
