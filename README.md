@@ -5,6 +5,7 @@
 Caddy v2 module to match network traffic and only allow traffic based on C2 profiles. This module currently works with the following C2 frameworks:
 - [Cobalt Strike](https://www.cobaltstrike.com/)
 - [Empire](https://github.com/BC-SECURITY/Empire) - Uses the same profile as Cobalt Strike ([docs](https://bc-security.gitbook.io/empire-wiki/listeners/malleable-c2))
+- [Nimhawk](https://github.com/hdbreaker/Nimhawk)
 - [NimPlant](https://github.com/chvancooten/NimPlant)
 
 Check out the blog post for more details: [C2 Redirectors Made Easy](https://blog.lum8rjack.com/posts/caddy-c2)
@@ -27,6 +28,7 @@ If you want to clone and make any changes, you can test locally with the followi
 Allow access to the C2 server for only requests that match the profile. Everything else is redirected to a different website. The supported frameworks include:
 - cobaltstrike
 - empire
+- nimhawk
 - nimplant
 
 Below is an example Caddyfile for use with Cobalt Strike.

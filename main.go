@@ -2,7 +2,8 @@
 Currently only supports the following frameworks:
 	1. Cobalt Strike
 	2. Empire
-	3. NimPlant
+	3. Nimhawk
+	4. NimPlant
 */
 
 package caddy_c2
@@ -13,6 +14,7 @@ import (
 	"os"
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
@@ -22,11 +24,11 @@ import (
 
 // Interface guards
 var (
-	_ caddy.Module             = (*C2Profile)(nil)
-	_ caddyhttp.RequestMatcher = (*C2Profile)(nil)
-	_ caddy.Provisioner        = (*C2Profile)(nil)
-	_ caddy.CleanerUpper       = (*C2Profile)(nil)
-	_ caddyfile.Unmarshaler    = (*C2Profile)(nil)
+	_ caddy.Module                      = (*C2Profile)(nil)
+	_ caddyhttp.RequestMatcherWithError = (*C2Profile)(nil)
+	_ caddy.Provisioner                 = (*C2Profile)(nil)
+	_ caddy.CleanerUpper                = (*C2Profile)(nil)
+	_ caddyfile.Unmarshaler             = (*C2Profile)(nil)
 )
 
 func init() {
@@ -44,9 +46,12 @@ type C2Profile struct {
 	Data []byte
 
 	// A list of attributes to get from the profiles
-	Useragent    string
-	AllowedGets  []string
-	AllowedPosts []string
+	Useragent              string
+	AllowedGets            []string
+	AllowedGetsStartsWith  []string
+	AllowedPosts           []string
+	AllowedPostsStartsWith []string
+	AllowedOptions         []string
 
 	logger *zap.Logger
 }
@@ -99,6 +104,11 @@ func (m *C2Profile) Provision(ctx caddy.Context) error {
 		if err != nil {
 			return fmt.Errorf("parsing error for Empire profile: %v", err)
 		}
+	} else if m.Framework == "nimhawk" {
+		err = m.ParseNimhawk()
+		if err != nil {
+			return fmt.Errorf("parsing error for Nimhawk config: %v", err)
+		}
 	} else if m.Framework == "nimplant" {
 		err = m.ParseNimPlant()
 		if err != nil {
@@ -120,30 +130,57 @@ func (m *C2Profile) Cleanup() error {
 
 // Match based on the profile
 func (m *C2Profile) Match(r *http.Request) bool {
+	matched, _ := m.MatchWithError(r)
+	return matched
+}
+
+// MatchWithError implements the newer interface
+func (m *C2Profile) MatchWithError(r *http.Request) (bool, error) {
 	// Check User-Agent
 	if r.Header.Get("User-Agent") != m.Useragent {
 		m.logger.Debug("failed User-Agent check", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
-		return false
+		return false, fmt.Errorf("user agent mismatch")
 	}
 
 	// Check URLs (disregard the query parameters)
 	if r.Method == "GET" {
-		if !slices.Contains(m.AllowedGets, r.URL.Path) {
-			m.logger.Debug("failed GET check", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
-			return false
-		}
-	} else if r.Method == "POST" {
-		if !slices.Contains(m.AllowedPosts, r.URL.Path) {
-			m.logger.Debug("failed POST check", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
-			return false
+		// Check if the path starts with any of the allowed GET paths
+		for _, path := range m.AllowedGetsStartsWith {
+			if strings.HasPrefix(r.URL.Path, path) {
+				m.logger.Debug("passed GET starts with check", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
+				return true, nil
+			}
 		}
 
-	} else { // Only GET and POST accepted
+		// Check specific GET paths
+		if !slices.Contains(m.AllowedGets, r.URL.Path) {
+			m.logger.Debug("failed GET check", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
+			return false, fmt.Errorf("GET path not allowed")
+		}
+	} else if r.Method == "POST" {
+		// Check if the path starts with any of the allowed POST paths
+		for _, path := range m.AllowedPostsStartsWith {
+			if strings.HasPrefix(r.URL.Path, path) {
+				m.logger.Debug("passed POST starts with check", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
+				return true, nil
+			}
+		}
+
+		// Check specific POST paths
+		if !slices.Contains(m.AllowedPosts, r.URL.Path) {
+			m.logger.Debug("failed POST check", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
+			return false, fmt.Errorf("POST path not allowed")
+		}
+	} else if r.Method == "OPTIONS" {
+		if !slices.Contains(m.AllowedOptions, r.URL.Path) {
+			m.logger.Debug("failed OPTIONS check", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
+			return false, fmt.Errorf("OPTIONS path not allowed")
+		}
+	} else { // Only GET, POST, and OPTIONS accepted
 		m.logger.Debug("method not supported", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
-		return false
+		return false, fmt.Errorf("method not supported")
 	}
 
 	m.logger.Debug("passed all checks", zap.String("ip", r.RemoteAddr), zap.String("method", r.Method), zap.String("uri", r.RequestURI))
-
-	return true
+	return true, nil
 }
